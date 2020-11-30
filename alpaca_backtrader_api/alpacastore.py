@@ -229,8 +229,9 @@ class AlpacaStore(metaclass=MetaSingleton):
         account_tmout: float = 10.0,
         api_version: None = None,
     ):
-        """The __init__ parameters actually come from `params`. They are only added
-        to enhance editor experience."""
+        # The __init__ parameters actually come from `params`.
+        # They are only added here to enhance editor experience.
+        # This is intentionally not a docstring.
         super().__init__()
 
         self.notifs = collections.deque()  # store notifications for cerebro
