@@ -29,7 +29,7 @@ setup(
     long_description_content_type='text/markdown',
     author='Alpaca',
     author_email='oss@alpaca.markets',
-    url='https://github.com/alpacahq/alpaca-backtrader-api',
+    url='https://github.com//RileyMShea/alpaca-backtrader-api',
     keywords='financial,timeseries,api,trade,backtrader',
     packages=['alpaca_backtrader_api'],
     install_requires=REQUIREMENTS,
