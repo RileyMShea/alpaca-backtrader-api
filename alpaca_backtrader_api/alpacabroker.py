@@ -27,7 +27,7 @@ class MetaAlpacaBroker(BrokerBase.__class__):
         Class has already been created ... register
         """
         # Initialize the class
-        super(MetaAlpacaBroker, cls).__init__(name, bases, dct)
+        super().__init__(name, bases, dct)
         alpacastore.AlpacaStore.BrokerCls = cls
 
 
@@ -46,12 +46,11 @@ class AlpacaBroker(BrokerBase, metaclass=MetaAlpacaBroker):
         Set to ``False`` during instantiation to disregard any existing
         position
     """
-    params = (
-        ('use_positions', True),
-    )
+
+    params = (("use_positions", True),)
 
     def __init__(self, **kwargs):
-        super(AlpacaBroker, self).__init__()
+        super().__init__()
 
         self.o = alpacastore.AlpacaStore(**kwargs)
 
@@ -78,21 +77,19 @@ class AlpacaBroker(BrokerBase, metaclass=MetaAlpacaBroker):
         if self.p.use_positions:
             broker_positions = self.o.oapi.list_positions()
             broker_positions_symbols = [p.symbol for p in broker_positions]
-            broker_positions_mapped_by_symbol = \
-                {p.symbol: p for p in broker_positions}
+            broker_positions_mapped_by_symbol = {p.symbol: p for p in broker_positions}
 
             for name, data in iteritems(self.cerebro.datasbyname):
                 if name in broker_positions_symbols:
                     size = int(broker_positions_mapped_by_symbol[name].qty)
                     positions[data] = Position(
                         size,
-                        float(broker_positions_mapped_by_symbol[
-                            name].avg_entry_price)
+                        float(broker_positions_mapped_by_symbol[name].avg_entry_price),
                     )
         return positions
 
     def start(self):
-        super(AlpacaBroker, self).start()
+        super().start()
         self.addcommissioninfo(self, AlpacaCommInfo(mult=1.0, stocklike=False))
         self.o.start(broker=self)
         self.startingcash = self.cash = self.o.get_cash()
@@ -103,39 +100,65 @@ class AlpacaBroker(BrokerBase, metaclass=MetaAlpacaBroker):
         pos = self.getposition(data)
 
         if pos.size < 0:
-            order = SellOrder(data=data,
-                              size=pos.size, price=pos.price,
-                              exectype=Order.Market,
-                              simulated=True)
+            order = SellOrder(
+                data=data,
+                size=pos.size,
+                price=pos.price,
+                exectype=Order.Market,
+                simulated=True,
+            )
 
             order.addcomminfo(self.getcommissioninfo(data))
-            order.execute(0, pos.size, pos.price,
-                          0, 0.0, 0.0,
-                          pos.size, 0.0, 0.0,
-                          0.0, 0.0,
-                          pos.size, pos.price)
+            order.execute(
+                0,
+                pos.size,
+                pos.price,
+                0,
+                0.0,
+                0.0,
+                pos.size,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                pos.size,
+                pos.price,
+            )
 
             order.completed()
             self.notify(order)
 
         elif pos.size > 0:
-            order = BuyOrder(data=data,
-                             size=pos.size, price=pos.price,
-                             exectype=Order.Market,
-                             simulated=True)
+            order = BuyOrder(
+                data=data,
+                size=pos.size,
+                price=pos.price,
+                exectype=Order.Market,
+                simulated=True,
+            )
 
             order.addcomminfo(self.getcommissioninfo(data))
-            order.execute(0, pos.size, pos.price,
-                          0, 0.0, 0.0,
-                          pos.size, 0.0, 0.0,
-                          0.0, 0.0,
-                          pos.size, pos.price)
+            order.execute(
+                0,
+                pos.size,
+                pos.price,
+                0,
+                0.0,
+                0.0,
+                pos.size,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                pos.size,
+                pos.price,
+            )
 
             order.completed()
             self.notify(order)
 
     def stop(self):
-        super(AlpacaBroker, self).stop()
+        super().stop()
         self.o.stop()
 
     def getcash(self):
@@ -211,12 +234,12 @@ class AlpacaBroker(BrokerBase, metaclass=MetaAlpacaBroker):
         self._bracketize(order, cancel=True)
 
     def _bracketnotif(self, order):
-        pref = getattr(order.parent, 'ref', order.ref)  # parent ref or self
+        pref = getattr(order.parent, "ref", order.ref)  # parent ref or self
         br = self.brackets.get(pref, None)  # to avoid recursion
         return br[-2:] if br is not None else []
 
     def _bracketize(self, order, cancel=False):
-        pref = getattr(order.parent, 'ref', order.ref)  # parent ref or self
+        pref = getattr(order.parent, "ref", order.ref)  # parent ref or self
         br = self.brackets.pop(pref, None)  # to avoid recursion
         if br is None:
             return
@@ -247,11 +270,21 @@ class AlpacaBroker(BrokerBase, metaclass=MetaAlpacaBroker):
         openedvalue = openedcomm = 0.0
         margin = pnl = 0.0
 
-        order.execute(data.datetime[0], size, price,
-                      closed, closedvalue, closedcomm,
-                      opened, openedvalue, openedcomm,
-                      margin, pnl,
-                      psize, pprice)
+        order.execute(
+            data.datetime[0],
+            size,
+            price,
+            closed,
+            closedvalue,
+            closedcomm,
+            opened,
+            openedvalue,
+            openedcomm,
+            margin,
+            pnl,
+            psize,
+            pprice,
+        )
 
         if order.executed.remsize:
             order.partial()
@@ -263,7 +296,7 @@ class AlpacaBroker(BrokerBase, metaclass=MetaAlpacaBroker):
 
     def _transmit(self, order):
         oref = order.ref
-        pref = getattr(order.parent, 'ref', oref)  # parent ref or self
+        pref = getattr(order.parent, "ref", oref)  # parent ref or self
         if order.transmit:
             if oref != pref:  # children order
                 # Put parent in orders dict, but add stopside and takeside
@@ -285,35 +318,75 @@ class AlpacaBroker(BrokerBase, metaclass=MetaAlpacaBroker):
         self.opending[pref].append(order)
         return order
 
-    def buy(self, owner, data,
-            size, price=None, plimit=None,
-            exectype=None, valid=None, tradeid=0, oco=None,
-            trailamount=None, trailpercent=None,
-            parent=None, transmit=True,
-            **kwargs):
+    def buy(
+        self,
+        owner,
+        data,
+        size,
+        price=None,
+        plimit=None,
+        exectype=None,
+        valid=None,
+        tradeid=0,
+        oco=None,
+        trailamount=None,
+        trailpercent=None,
+        parent=None,
+        transmit=True,
+        **kwargs,
+    ):
 
-        order = BuyOrder(owner=owner, data=data,
-                         size=size, price=price, pricelimit=plimit,
-                         exectype=exectype, valid=valid, tradeid=tradeid,
-                         trailamount=trailamount, trailpercent=trailpercent,
-                         parent=parent, transmit=transmit)
+        order = BuyOrder(
+            owner=owner,
+            data=data,
+            size=size,
+            price=price,
+            pricelimit=plimit,
+            exectype=exectype,
+            valid=valid,
+            tradeid=tradeid,
+            trailamount=trailamount,
+            trailpercent=trailpercent,
+            parent=parent,
+            transmit=transmit,
+        )
 
         order.addinfo(**kwargs)
         order.addcomminfo(self.getcommissioninfo(data))
         return self._transmit(order)
 
-    def sell(self, owner, data,
-             size, price=None, plimit=None,
-             exectype=None, valid=None, tradeid=0, oco=None,
-             trailamount=None, trailpercent=None,
-             parent=None, transmit=True,
-             **kwargs):
+    def sell(
+        self,
+        owner,
+        data,
+        size,
+        price=None,
+        plimit=None,
+        exectype=None,
+        valid=None,
+        tradeid=0,
+        oco=None,
+        trailamount=None,
+        trailpercent=None,
+        parent=None,
+        transmit=True,
+        **kwargs,
+    ):
 
-        order = SellOrder(owner=owner, data=data,
-                          size=size, price=price, pricelimit=plimit,
-                          exectype=exectype, valid=valid, tradeid=tradeid,
-                          trailamount=trailamount, trailpercent=trailpercent,
-                          parent=parent, transmit=transmit)
+        order = SellOrder(
+            owner=owner,
+            data=data,
+            size=size,
+            price=price,
+            pricelimit=plimit,
+            exectype=exectype,
+            valid=valid,
+            tradeid=tradeid,
+            trailamount=trailamount,
+            trailpercent=trailpercent,
+            parent=parent,
+            transmit=transmit,
+        )
 
         order.addinfo(**kwargs)
         order.addcomminfo(self.getcommissioninfo(data))

@@ -1,6 +1,3 @@
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 from datetime import datetime, timedelta
 
 from backtrader.feed import DataBase
@@ -16,7 +13,7 @@ class MetaAlpacaData(DataBase.__class__):
         Class has already been created ... register
         """
         # Initialize the class
-        super(MetaAlpacaData, cls).__init__(name, bases, dct)
+        super().__init__(name, bases, dct)
 
         # Register with the store
         alpacastore.AlpacaStore.DataCls = cls
@@ -120,18 +117,19 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
 
     Any other combination will be rejected
     """
+
     params = (
-        ('qcheck', 0.5),
-        ('historical', False),  # do backfilling at the start
-        ('backfill_start', True),  # do backfilling at the start
-        ('backfill', True),  # do backfilling when reconnecting
-        ('backfill_from', None),  # additional data source to do backfill from
-        ('bidask', True),
-        ('useask', False),
-        ('includeFirst', True),
-        ('reconnect', True),
-        ('reconnections', -1),  # forever
-        ('reconntimeout', 5.0),
+        ("qcheck", 0.5),
+        ("historical", False),  # do backfilling at the start
+        ("backfill_start", True),  # do backfilling at the start
+        ("backfill", True),  # do backfilling when reconnecting
+        ("backfill_from", None),  # additional data source to do backfill from
+        ("bidask", True),
+        ("useask", False),
+        ("includeFirst", True),
+        ("reconnect", True),
+        ("reconnections", -1),  # forever
+        ("reconntimeout", 5.0),
     )
 
     _store = alpacastore.AlpacaStore
@@ -154,7 +152,7 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
 
     def __init__(self, **kwargs):
         self.o = self._store(**kwargs)
-        self._candleFormat = 'bidask' if self.p.bidask else 'midpoint'
+        self._candleFormat = "bidask" if self.p.bidask else "midpoint"
         self.do_qcheck(True, 0)
 
     def setenvironment(self, env):
@@ -162,7 +160,7 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
         Receives an environment (cerebro) and passes it over to the store it
         belongs to
         """
-        super(AlpacaData, self).setenvironment(env)
+        super().setenvironment(env)
         env.addstore(self.o)
 
     def start(self):
@@ -170,7 +168,7 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
         Starts the Alpaca connection and gets the real contract and
         contractdetails if it exists
         """
-        super(AlpacaData, self).start()
+        super().start()
 
         # Create attributes as soon as possible
         self._statelivereconn = False  # if reconnecting in live state
@@ -209,18 +207,22 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
         if self.p.historical:
             self.put_notification(self.DELAYED)
             dtend = None
-            if self.todate < float('inf'):
+            if self.todate < float("inf"):
                 dtend = num2date(self.todate)
 
             dtbegin = None
-            if self.fromdate > float('-inf'):
+            if self.fromdate > float("-inf"):
                 dtbegin = num2date(self.fromdate)
 
             self.qhist = self.o.candles(
-                self.p.dataname, dtbegin, dtend,
-                self._timeframe, self._compression,
+                self.p.dataname,
+                dtbegin,
+                dtend,
+                self._timeframe,
+                self._compression,
                 candleFormat=self._candleFormat,
-                includeFirst=self.p.includeFirst)
+                includeFirst=self.p.includeFirst,
+            )
 
             self._state = self._ST_HISTORBACK
             return True
@@ -243,7 +245,7 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
         """
         Stops and tells the store to stop
         """
-        super(AlpacaData, self).stop()
+        super().stop()
         self.o.stop()
 
     def haslivedata(self):
@@ -256,8 +258,9 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
         while True:
             if self._state == self._ST_LIVE:
                 try:
-                    msg = (self._storedmsg.pop(None, None) or
-                           self.qlive.get(timeout=self._qcheck))
+                    msg = self._storedmsg.pop(None, None) or self.qlive.get(
+                        timeout=self._qcheck
+                    )
                 except queue.Empty:
                     return None  # indicate timeout situation
                 if msg is None:  # Conn broken during historical/backfilling
@@ -273,9 +276,9 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
                     self._st_start(instart=False, tmout=self.p.reconntimeout)
                     continue
 
-                if 'code' in msg:
+                if "code" in msg:
                     self.put_notification(self.CONNBROKEN)
-                    code = msg['code']
+                    code = msg["code"]
                     if code not in [599, 598, 596]:
                         self.put_notification(self.DISCONNECTED)
                         self._state = self._ST_OVER
@@ -318,19 +321,23 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
                 if len(self) > 1:
                     # len == 1 ... forwarded for the 1st time
                     dtbegin = self.datetime.datetime(-1)
-                elif self.fromdate > float('-inf'):
+                elif self.fromdate > float("-inf"):
                     dtbegin = num2date(self.fromdate)
                 else:  # 1st bar and no begin set
                     # passing None to fetch max possible in 1 request
                     dtbegin = None
 
-                dtend = datetime.utcfromtimestamp(int(msg['time']))
+                dtend = datetime.utcfromtimestamp(int(msg["time"]))
 
                 self.qhist = self.o.candles(
-                    self.p.dataname, dtbegin, dtend,
-                    self._timeframe, self._compression,
+                    self.p.dataname,
+                    dtbegin,
+                    dtend,
+                    self._timeframe,
+                    self._compression,
                     candleFormat=self._candleFormat,
-                    includeFirst=self.p.includeFirst)
+                    includeFirst=self.p.includeFirst,
+                )
 
                 self._state = self._ST_HISTORBACK
                 self._statelivereconn = False  # no longer in live
@@ -344,7 +351,7 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
                     self._state = self._ST_OVER
                     return False  # error management cancelled the queue
 
-                elif 'code' in msg:  # Error
+                elif "code" in msg:  # Error
                     self.put_notification(self.NOTSUBSCRIBED)
                     self.put_notification(self.DISCONNECTED)
                     self._state = self._ST_OVER
@@ -387,7 +394,7 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
                     return False
 
     def _load_tick(self, msg):
-        dtobj = datetime.utcfromtimestamp(int(msg['time']))
+        dtobj = datetime.utcfromtimestamp(int(msg["time"]))
         dt = date2num(dtobj)
         if dt <= self.lines.datetime[-1]:
             return False  # time already seen
@@ -398,9 +405,7 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
         self.lines.openinterest[0] = 0.0
 
         # Put the prices into the bar
-        tick = float(
-            msg['askprice']) if self.p.useask else float(
-            msg['bidprice'])
+        tick = float(msg["askprice"]) if self.p.useask else float(msg["bidprice"])
         self.lines.open[0] = tick
         self.lines.high[0] = tick
         self.lines.low[0] = tick
@@ -411,21 +416,21 @@ class AlpacaData(DataBase, metaclass=MetaAlpacaData):
         return True
 
     def _load_history(self, msg):
-        dtobj = msg['time'].to_pydatetime()
+        dtobj = msg["time"].to_pydatetime()
         dt = date2num(dtobj)
         if dt <= self.lines.datetime[-1]:
             return False  # time already seen
 
         # Common fields
         self.lines.datetime[0] = dt
-        self.lines.volume[0] = msg['volume']
+        self.lines.volume[0] = msg["volume"]
         self.lines.openinterest[0] = 0.0
 
         # Put the prices into the bar
 
-        self.lines.open[0] = msg['open']
-        self.lines.high[0] = msg['high']
-        self.lines.low[0] = msg['low']
-        self.lines.close[0] = msg['close']
+        self.lines.open[0] = msg["open"]
+        self.lines.high[0] = msg["high"]
+        self.lines.low[0] = msg["low"]
+        self.lines.close[0] = msg["close"]
 
         return True

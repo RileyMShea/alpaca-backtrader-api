@@ -3,6 +3,8 @@ from .alpacabroker import AlpacaBroker
 from .alpacadata import AlpacaData
 
 __all__ = [
-    'AlpacaStore', 'AlpacaBroker', 'AlpacaData',
+    "AlpacaStore",
+    "AlpacaBroker",
+    "AlpacaData",
 ]
-__version__ = '0.12.0'
+__version__ = "0.12.0"

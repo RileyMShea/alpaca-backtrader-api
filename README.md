@@ -3,7 +3,7 @@
 [![Updates](https://pyup.io/repos/github/alpacahq/alpaca-backtrader-api/shield.svg)](https://pyup.io/repos/github/alpacahq/alpaca-backtrader-api/)
 [![Python 3](https://pyup.io/repos/github/alpacahq/alpaca-backtrader-api/python-3-shield.svg)](https://pyup.io/repos/github/alpacahq/alpaca-backtrader-api/)
 
-# alpaca-backtrader-api
+# fork of alpaca-backtrader-api
 
 `alpaca-backtrader-api` is a python library for the Alpaca trade API
 within `backtrader` framework.
@@ -11,20 +11,20 @@ It allows rapid trading algo development easily, with support for the
 both REST and streaming interfaces. For details of each API behavior,
 please see the online API document.
 
-Note this module supports only python version 3.5 and above, due to
+Note this module supports only python version 3.8 and above, due to
 the underlying library `alpaca-trade-api`.
 
 ## Install
 
 ```bash
-$ pip3 install alpaca-backtrader-api
+$ poetry add alpaca-backtrader-api
 ```
 
 ## Example
 
 #### These examples only work if you have a funded brokerage account or another means of accessing Polygon data.
 
-you can find example strategies in the [samples](https://github.com/alpacahq/alpaca-backtrader-api/tree/master/sample) folder. 
+you can find example strategies in the samples folder.
 
 remember to add you credentials.
 

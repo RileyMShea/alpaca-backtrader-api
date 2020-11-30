@@ -15,7 +15,7 @@ USE_POLYGON = True
 class Resample(bt.Strategy):
     def notify_data(self, data, status, *args, **kwargs):
         super().notify_data(data, status, *args, **kwargs)
-        print('*' * 5, 'DATA NOTIF:', data._getstatusname(status), *args)
+        print("*" * 5, "DATA NOTIF:", data._getstatusname(status), *args)
         if data._getstatusname(status) == "LIVE":
             self.live_bars = True
 
@@ -28,9 +28,10 @@ class Resample(bt.Strategy):
         print(datetime.utcnow())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import logging
-    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
+
+    logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO)
 
     cerebro = bt.Cerebro()
     cerebro.addstrategy(Resample)
@@ -39,20 +40,18 @@ if __name__ == '__main__':
         key_id=ALPACA_API_KEY,
         secret_key=ALPACA_SECRET_KEY,
         paper=not IS_LIVE,
-        usePolygon=USE_POLYGON
+        usePolygon=USE_POLYGON,
     )
     DataFactory = store.getdata
-    data0 = DataFactory(dataname=symbol,
-                        historical=False,
-                        timeframe=bt.TimeFrame.Minutes,
-                        qcheck=10.0,
-                        backfill_start=True,
-                        fromdate=datetime.utcnow() - timedelta(
-                            minutes=20)
-                        )
+    data0 = DataFactory(
+        dataname=symbol,
+        historical=False,
+        timeframe=bt.TimeFrame.Minutes,
+        qcheck=10.0,
+        backfill_start=True,
+        fromdate=datetime.utcnow() - timedelta(minutes=20),
+    )
     broker = store.getbroker()
     cerebro.setbroker(broker)
-    cerebro.resampledata(data0,
-                         compression=2,
-                         timeframe=bt.TimeFrame.Minutes)
+    cerebro.resampledata(data0, compression=2, timeframe=bt.TimeFrame.Minutes)
     cerebro.run()

@@ -1,2 +1,0 @@
-alpaca-trade-api==0.51.0
-trading_calendars==2.0.0
