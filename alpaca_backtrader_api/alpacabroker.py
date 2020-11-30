@@ -1,10 +1,7 @@
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 import collections
 
 from backtrader import BrokerBase, Order, BuyOrder, SellOrder
-from backtrader.utils.py3 import with_metaclass, iteritems
+from backtrader.utils.py3 import iteritems
 from backtrader.comminfo import CommInfoBase
 from backtrader.position import Position
 
@@ -34,7 +31,7 @@ class MetaAlpacaBroker(BrokerBase.__class__):
         alpacastore.AlpacaStore.BrokerCls = cls
 
 
-class AlpacaBroker(with_metaclass(MetaAlpacaBroker, BrokerBase)):
+class AlpacaBroker(BrokerBase, metaclass=MetaAlpacaBroker):
     """
     Broker implementation for Alpaca.
 

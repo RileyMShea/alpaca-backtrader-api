@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from backtrader.feed import DataBase
 from backtrader import date2num, num2date
-from backtrader.utils.py3 import queue, with_metaclass
+import queue
 
 from alpaca_backtrader_api import alpacastore
 
@@ -22,7 +22,7 @@ class MetaAlpacaData(DataBase.__class__):
         alpacastore.AlpacaStore.DataCls = cls
 
 
-class AlpacaData(with_metaclass(MetaAlpacaData, DataBase)):
+class AlpacaData(DataBase, metaclass=MetaAlpacaData):
     """
     Alpaca Data Feed.
 

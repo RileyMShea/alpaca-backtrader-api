@@ -20,7 +20,7 @@ import pandas as pd
 import backtrader as bt
 from alpaca_trade_api.entity import Aggs
 from backtrader.metabase import MetaParams
-from backtrader.utils.py3 import queue, with_metaclass
+import queue
 
 NY = 'America/New_York'
 
@@ -182,7 +182,7 @@ class MetaSingleton(MetaParams):
         return cls._singleton
 
 
-class AlpacaStore(with_metaclass(MetaSingleton, object)):
+class AlpacaStore(metaclass=MetaSingleton):
     '''Singleton class wrapping to control the connections to Alpaca.
 
     Params:
